@@ -35,6 +35,11 @@ public class LevelScreen extends BaseScreen {
                     (float) props.get("width"), (float) props.get("height"), mainStage);
         }
 
+        for (MapObject obj : tma.getRectangleList("Abyss")) {
+            MapProperties props = obj.getProperties();
+            new Abyss((float) props.get("x"), (float) props.get("y"), mainStage);
+        }
+
         MapObject startPoint = tma.getRectangleList("Start").get(0);
         MapProperties startProps = startPoint.getProperties();
         jack = new Koala((float) startProps.get("x"), (float) startProps.get("y"), mainStage);
@@ -129,6 +134,16 @@ public class LevelScreen extends BaseScreen {
                 coins++;
                 coinLabel.setText("Coins: " + coins);
                 coin.remove();
+            }
+        }
+
+        for (BaseActor abyss : BaseActor.getList(mainStage, "Abyss")) {
+            if (jack.overlaps(abyss)){
+                messageLabel.setText("Game Over");
+                messageLabel.setColor(Color.RED);
+                messageLabel.setVisible(true);
+                jack.remove();
+                gameOver = true;
             }
         }
 
