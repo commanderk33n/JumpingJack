@@ -38,7 +38,7 @@ public class Koala extends BaseActor
         gravity            = 700;
         maxVerticalSpeed   = 1000;
 
-        setBoundaryPolygon(6);
+        setBoundaryPolygon(8);
 
         jump = loadTexture( "assets/koala/jump.png"  );
         jumpSpeed = 450;

@@ -64,6 +64,8 @@ public class BaseActor extends Group
         acceleration = 0;
         maxSpeed = 1000;
         deceleration = 0;
+
+        boundaryPolygon = null;
     }
 
     /**
