@@ -1,5 +1,6 @@
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -14,6 +15,10 @@ public class Koala extends BaseActor
     private float maxHorizontalSpeed;
     private float gravity;
     private float maxVerticalSpeed;
+
+    private Animation jump;
+    private float jumpSpeed;
+    private BaseActor belowSensor;
 
     public Koala(float x, float y, Stage s)
     {
@@ -32,6 +37,18 @@ public class Koala extends BaseActor
         walkDeceleration   = 200;
         gravity            = 700;
         maxVerticalSpeed   = 1000;
+
+        setBoundaryPolygon(6);
+
+        jump = loadTexture( "assets/koala/jump.png"  );
+        jumpSpeed = 450;
+
+        // set up the below sensor
+        belowSensor = new BaseActor(0,0, s);
+        belowSensor.loadTexture("assets/white.png");
+        belowSensor.setSize( this.getWidth() - 8, 8 );
+        belowSensor.setBoundaryRectangle();
+        belowSensor.setVisible(true);
     }
 
     public void act(float dt)
@@ -40,25 +57,24 @@ public class Koala extends BaseActor
 
         // get keyboard input
         if (Gdx.input.isKeyPressed(Keys.LEFT))
-            accelerationVec.add( -walkAcceleration, 0 );
+            accelerationVec.add(-walkAcceleration, 0);
 
         if (Gdx.input.isKeyPressed(Keys.RIGHT))
-            accelerationVec.add( walkAcceleration, 0 );
+            accelerationVec.add(walkAcceleration, 0);
 
         // decelerate when not accelerating
-        if ( !Gdx.input.isKeyPressed(Keys.RIGHT)
-                && !Gdx.input.isKeyPressed(Keys.LEFT)  )
+        if (!Gdx.input.isKeyPressed(Keys.RIGHT) && !Gdx.input.isKeyPressed(Keys.LEFT))
         {
             float decelerationAmount = walkDeceleration * dt;
 
             float walkDirection;
 
-            if ( velocityVec.x > 0 )
+            if (velocityVec.x > 0)
                 walkDirection = 1;
             else
                 walkDirection = -1;
 
-            float walkSpeed = Math.abs( velocityVec.x );
+            float walkSpeed = Math.abs(velocityVec.x);
 
             walkSpeed -= decelerationAmount;
 
@@ -74,24 +90,59 @@ public class Koala extends BaseActor
         velocityVec.add(accelerationVec.x * dt, accelerationVec.y * dt);
 
         velocityVec.x = MathUtils.clamp( velocityVec.x, -maxHorizontalSpeed, maxHorizontalSpeed );
-        velocityVec.y = MathUtils.clamp(velocityVec.y * dt, -maxVerticalSpeed, maxVerticalSpeed);
 
-        moveBy( velocityVec.x * dt, velocityVec.y * dt );
+        moveBy(velocityVec.x * dt, velocityVec.y * dt);
 
         // reset acceleration
         accelerationVec.set(0,0);
 
-        // manage animations
-        if(velocityVec.x == 0)
-            setAnimation(stand);
-        else setAnimation(walk);
+        // move the below sensor below the koala
+        belowSensor.setPosition(getX() + 4, getY() - 8);
 
-        if(velocityVec.x > 0)
+        // manage animations
+        if (this.isOnSolid())
+        {
+            belowSensor.setColor(Color.GREEN);
+            if (velocityVec.x == 0)
+                setAnimation(stand);
+            else
+                setAnimation(walk);
+        }
+        else
+        {
+            belowSensor.setColor(Color.RED);
+            setAnimation(jump);
+        }
+
+        if (velocityVec.x > 0) // face right
             setScaleX(1);
-        if(velocityVec.x < 0)
+
+        if (velocityVec.x < 0) // face left
             setScaleX(-1);
 
         alignCamera();
         boundToWorld();
+    }
+
+    public boolean belowOverlaps(BaseActor actor)
+    {
+        return belowSensor.overlaps(actor);
+    }
+
+    public boolean isOnSolid()
+    {
+        for (BaseActor actor : BaseActor.getList(getStage(), "Solid"))
+        {
+            Solid solid = (Solid)actor;
+            if (belowOverlaps(solid) && solid.isEnabled())
+                return true;
+        }
+
+        return false;
+    }
+
+    public void jump()
+    {
+        velocityVec.y = jumpSpeed;
     }
 }

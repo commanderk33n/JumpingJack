@@ -6,6 +6,6 @@ public class Launcher
     public static void main (String[] args)
     {
         Game myGame = new JumpingJackGame();
-        LwjglApplication launcher = new LwjglApplication( myGame, "Game Title", 800, 640 );
+        LwjglApplication launcher = new LwjglApplication( myGame, "Jumping Jack", 800, 640 );
     }
 }
