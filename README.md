@@ -1,5 +1,5 @@
-# JumpingJAck
-small 2D-platformer created with LibGDX for learning purposes
+# JumpingJack
+2D-platform game created with LibGDX for learning purposes
 
 ## Gameplay
 Control a Koala, collect coins, keys and power ups to reach the flag and win the game
